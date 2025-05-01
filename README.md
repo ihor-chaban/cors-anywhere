@@ -14,8 +14,8 @@ This project provides a simple way to bypass CORS restrictions by running a prox
 - **HTTPS Support**: Secure communication with TLS certificates.
 - **Rate Limiting**: Prevent abuse with configurable rate limits.
 - **Multi-Arch Docker Images**: Prebuilt images are available for multiple architectures.
-- **Easy to set up and configure.**
-- **Allows secure certificate management.**
+- **SSL Certificate Auto-Renewal**: Automatically renews SSL certificates using Let's Encrypt.
+- **Easy to set up and configure.**: Entire set up takes less than 5 minutes.
 
 ## Getting Started
 
@@ -27,11 +27,40 @@ This project provides a simple way to bypass CORS restrictions by running a prox
 ## Folder Structure
 
 - `.env`: Environment configuration file.
+- `config/`: Directory for storing `nginx-proxy` and `acme-companion` files.
 - `certificates/`: Directory for storing SSL certificates.
 
-## Running with Docker Compose
+### Running with HTTPS and Auto-Renewal
 
-Use the provided `docker-compose.yml` file to start the proxy server:
+To enable HTTPS with automatic SSL certificate renewal, use the `docker-compose.https-endpoint.yml` file. This setup uses `nginx-proxy` and `acme-companion` to manage SSL certificates via Let's Encrypt.
+
+1. Ensure the `.env` file is configured with the following variables:
+   - `LETSENCRYPT_EMAIL`: Your email address for Let's Encrypt notifications.
+   - `LETSENCRYPT_HOST`: The domain name for which the SSL certificate will be issued.
+   - `VIRTUAL_HOST`: The domain name to route traffic to the proxy server.
+   - `VIRTUAL_PORT`: The internal port of the proxy server (default: `8080`).
+
+2. Start the services:
+
+```sh
+docker-compose -f docker-compose.https-endpoint.yml -f docker-compose.yml up -d
+```
+
+This will:
+
+- Set up an NGINX reverse proxy to handle HTTPS traffic.
+- Automatically issue and renew SSL certificates using Let's Encrypt.
+- Route traffic to the CORS Anywhere proxy server.
+
+### Running Without HTTPS Auto-Renewal
+
+If you prefer to run the proxy server without automatic SSL certificate renewal, you can use the `docker-compose.yml` file alone. This setup assumes you have already obtained and configured your SSL certificates manually.
+
+1. Ensure the `.env` file is configured with the following variables:
+   - `CERT`: Path to your SSL certificate file.
+   - `KEY`: Path to your SSL private key file.
+
+2. Start the services:
 
 ```sh
 docker-compose up -d
@@ -39,9 +68,11 @@ docker-compose up -d
 
 This will:
 
+- Start the CORS Anywhere proxy server.
+- Use the provided SSL certificate and private key for HTTPS communication.
 - Map port `443` on the host to port `8080` in the container.
-- Mount the `certificates` directory for TLS certificates.
-- Restart the container automatically unless stopped.
+
+Ensure your SSL certificate and private key are stored in the `certificates/` directory or another location accessible to the container, and update the paths in the `.env` file accordingly.
 
 ### Multi-Arch Docker Images
 
@@ -66,9 +97,15 @@ To stop the server, run:
 docker-compose down
 ```
 
+For the HTTPS setup:
+
+```sh
+docker-compose -f docker-compose.https-endpoint.yml -f docker-compose.yml down
+```
+
 ## License
 
 This project is licensed under the MIT License. See the original [cors-anywhere](https://github.com/Rob--W/cors-anywhere) repository for more details.
 
 ---
-This README.md is AI-generated based on the project code.
+This `README.md` is AI-generated based on the project code.

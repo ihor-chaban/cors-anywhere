@@ -2,13 +2,6 @@ services:
   cors-anywhere:
     container_name: cors-anywhere
     image: gorus5/cors-anywhere
-    environment:
-      - CERT=/usr/src/app/certificates/fullchain.pem
-      - KEY=/usr/src/app/certificates/privkey.pem
     env_file:
       - .env
-    volumes:
-      - ./certificates:/usr/src/app/certificates
-    ports:
-      - "443:8080"
     restart: unless-stopped
